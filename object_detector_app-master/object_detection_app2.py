@@ -9,21 +9,11 @@ from utils.app_utils import FPS, WebcamVideoStream, HLSVideoStream
 from multiprocessing import Queue, Pool
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
-import pygame  # pip install pygame
-from playsound import playsound
+
 #语言播报
-from aip import AipSpeech
 import pyttsx3
 # coding: utf-8
-import urllib.request
-import urllib.parse
-import json
 
-""" 你的 APPID AK SK """
-APP_ID = '16126605'
-API_KEY = '4LMBg2SzOGOaSu5OONNUkUYw'
-SECRET_KEY = 'LOZcgIxnmG4kXdxGaGvEtia1vQ2zaoLl'
-client = AipSpeech(APP_ID, API_KEY, SECRET_KEY)#Api常规设置
 
 
 
@@ -49,88 +39,12 @@ category_index = label_map_util.create_category_index(categories)
 
 
 
-def get_data(words):
-    data = {}
-    data["type"] = "AUTO"
-    data["i"] = words
-    data["doctype"] = "json"
-    data["xmlVersion"] = "1.8"
-    data["keyfrom:fanyi"] = "web"
-    data["ue"] = "UTF-8"
-    data["action"] = "FY_BY_CLICKBUTTON"
-    data["typoResult"] = "true"
-    data = urllib.parse.urlencode(data).encode('utf-8')
-    return data
-
-
-def url_open(url, data):
-    req = urllib.request.Request(url, data)
-    req.add_header("User-Agent",
-                   "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
-    response = urllib.request.urlopen(req)
-    html = response.read()
-    html = html.decode("utf-8")
-    return html
-
-
-def get_json_data(html):
-    result = json.loads(html)
-    result = result['translateResult']
-    result = result[0][0]['tgt']
-    return result
-
-
-def main(words):
-    # words = input("please input words: ")
-    url = "http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=dict.top"
-
-    data = get_data(words)
-    html = url_open(url, data)
-    return  get_json_data(html)
-
-
-# if __name__ == "__main__":
-#     while True:
-#         main()
-
 
 def strings(str1):
     result = '前方发现'+str(str1)
     engine = pyttsx3.init()
     engine.say(result)
     engine.runAndWait()
-#     print(str1)
-#     # 识别正确返回语音二进制 错误则返回dict 参照下面错误码
-#     while 1:
-#         if not isinstance(result, dict):
-#             with open('auido.mp3', 'wb') as f:
-#                 f.write(result)
-#         playsound("auido.mp3")
-#             # playMusic('auido.mp3')
-#
-# # 貌似只能播放单声道音乐，可能是pygame模块限制
-# def playMusic(filename, loops=0, start=0.0, value=0.5):
-#     """
-#     :param filename: 文件名
-#     :param loops: 循环次数
-#     :param start: 从多少秒开始播放
-#     :param value: 设置播放的音量，音量value的范围为0.0到1.0
-#     :return:
-#     """
-#     flag = False  # 是否播放过
-#     pygame.mixer.init()  # 音乐模块初始化
-#     while 1:
-#         if flag == 0:
-#             pygame.mixer.music.load(filename)
-#             # pygame.mixer.music.play(loops=0, start=0.0) loops和start分别代表重复的次数和开始播放的位置。
-#             pygame.mixer.music.play(loops=loops, start=start)
-#             pygame.mixer.music.set_volume(value)  # 来设置播放的音量，音量value的范围为0.0到1.0。
-#         if pygame.mixer.music.get_busy() == True:
-#             flag = True
-#         else:
-#             if flag:
-#                 pygame.mixer.music.stop()  # 停止播放
-#                 break
 
 def detect_objects(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -210,7 +124,7 @@ if __name__ == '__main__':
 
     # webcamera
     # cam_url = 'rtsp://admin:admin123@192.168.0.64:554/stream/realtime?channel=1&streamtype=0'
-    cam_url = 'rtsp://admin:yin7372175240000@192.168.0.108:554/cam/realmonitor?channel=1&subtype=1'
+    cam_url = 'rtsp://admin:yin7372175240000@192.168.0.140:554/cam/realmonitor?channel=1&subtype=1'
     video_capture = cv2.VideoCapture(cam_url)
     # video_capture = WebcamVideoStream(src=args.video_source,
     #                                 width=args.width,
@@ -236,7 +150,6 @@ if __name__ == '__main__':
             if cv2.waitKey(1) == ord('r'):
                 message = open('1.txt').read()
                 print(message)
-                message = main(message)
                 strings(message)
 
         else:
@@ -287,9 +200,9 @@ if __name__ == '__main__':
 
 
 
-    fps.stop()
-    print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
-    print('[INFO] approx. FPS: {:.2f}'.format(fps.fps()))
+    # fps.stop()
+    # print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
+    # print('[INFO] approx. FPS: {:.2f}'.format(fps.fps()))
 
     pool.terminate()
     video_capture.stop()
